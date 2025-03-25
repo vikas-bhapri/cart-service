@@ -1,0 +1,27 @@
+name: User Service CI 
+on: 
+    pull_request: 
+        branches: 
+            - main
+        types:
+            - closed
+    workflow_dispatch:
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Docker login
+              uses: azure/docker-login@v1
+              with:
+                  login-server: ${{ secrets.ACR_NAME }}
+                  username: ${{ secrets.ACR_USERNAME }}
+                  password: ${{ secrets.ACR_PASSWORD }}
+
+            - name: Build and push
+              run: |
+                  docker build . -t ${{ secrets.ACR_NAME }}/ecommerce_cart_service:${{ github.sha }}
+                  docker push ${{ secrets.ACR_NAME }}/ecommerce_cart_service:${{ github.sha }}
