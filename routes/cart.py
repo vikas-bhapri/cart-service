@@ -20,3 +20,7 @@ async def get_cart(user_id: str, db: Session = Depends(get_db)):
 @router.delete("/", response_model=cart_schema.DisplayCart, status_code=status.HTTP_200_OK)
 async def delete_from_cart(cart: cart_schema.RemoveCart, db: Session = Depends(get_db)):
     return cart_controller.remove_from_cart(cart, db)
+
+@router.post("/checkout", response_model=cart_schema.DisplayCart, status_code=status.HTTP_200_OK)
+async def checkout(user_id: str, db: Session = Depends(get_db)):
+    return cart_controller.checkout(user_id, db)

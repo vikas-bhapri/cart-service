@@ -1,8 +1,24 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from schemas import cart as cart_schema
-from models import cart as cart_model
+from models import cart as cart_model, order as order_model
+from azure.servicebus import ServiceBusClient, ServiceBusMessage
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+SERVICEBUS_CONNECTION_STRING = os.getenv("SERVICEBUS_CONNECTION_STRING")
+TOPIC_NAME = os.getenv("TOPIC_NAME")
+
+def publish_order_event(order_data, event_type):
+    with ServiceBusClient.from_connection_string(SERVICEBUS_CONNECTION_STRING) as client:
+        sender = client.get_topic_sender(TOPIC_NAME)
+        with sender:
+            message = ServiceBusMessage(order_data)
+            message.application_properties = {"event_type": event_type}
+            sender.send_messages(message)
+            print(f"Published order event: {order_data}")
 
 def add_to_cart(cart: cart_schema.InsertCart, db: Session):
     # check if the user already added the product to the cart
@@ -72,4 +88,51 @@ def remove_from_cart(cart: cart_schema.RemoveCart, db: Session):
     return {
         "user_id": cart.user_id,
         "cart_items": cart_items
+    }
+
+
+def checkout(user_id: str, db: Session):
+    cart_items = db.query(cart_model.Cart).filter(cart_model.Cart.user_id == user_id).all()
+
+    if len(cart_items) == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cart is empty")
+    
+    total_price = sum([item.product_price * item.product_quantity for item in cart_items])
+    
+    cart_items_data = [
+        {
+            "product_id": item.product_id,
+            "product_name": item.product_name,
+            "product_price": item.product_price,
+            "product_quantity": item.product_quantity,
+            "total_price": item.product_price * item.product_quantity
+        }
+        for item in cart_items
+    ]
+    
+    # Create an order
+    new_order = order_model.Orders(
+        user_id=user_id,
+        total_price=total_price,
+        order_details=str(cart_items_data),
+        status="Processing",
+        is_success=None,
+        reason=None
+    )
+    db.add(new_order)
+    db.commit()
+    
+    # Delete the cart items
+    db.query(cart_model.Cart).filter(cart_model.Cart.user_id == user_id).delete()
+    db.commit()
+    db.refresh(new_order)
+    
+    publish_order_event(str({
+        "user_id": user_id,
+        "cart_items": cart_items_data
+    }), "products_check")
+
+    return {
+        "user_id": user_id,
+        "cart_items": cart_items_data
     }
