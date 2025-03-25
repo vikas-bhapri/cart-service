@@ -1,6 +1,6 @@
 # Cart Service using Python FastAPI
 
-![Cart Service CI](https://github.com/your-username/cart-service/actions/workflows/actions.yml/badge.svg?branch=main&cache-bust=1)
+![Cart Service CI](https://github.com/vikas-bhapri/cart-service/actions/workflows/actions.yml/badge.svg?branch=main&cache-bust=1)
 
 This service provides endpoints for managing the shopping cart in an e-commerce application using Python FastAPI. It allows users to add, update, remove, and retrieve items in their cart.
 
