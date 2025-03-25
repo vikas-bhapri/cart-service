@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, JSON, Boolean, Float
 from database import Base
 
 class Cart(Base):
@@ -9,3 +9,4 @@ class Cart(Base):
     product_price = Column(Integer)
     product_quantity = Column(Integer)
     user_id = Column(Integer)
+
