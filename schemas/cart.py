@@ -22,3 +22,19 @@ class Product(BaseModel):
 class DisplayCart(BaseModel):
     user_id: str
     cart_items: List[Product]
+
+class Checkout(BaseModel):
+    user_id: str
+    order_id: int
+    cart_items: List[Product]
+    user_address: str
+    user_phone: int
+    total_price: float
+
+class UserAddress(BaseModel):
+    user_address: str
+    user_phone: int
+
+class OrderStatus(BaseModel):
+    status: str
+    reason: Optional[str]
