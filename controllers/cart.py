@@ -103,7 +103,7 @@ def remove_from_cart(cart: cart_schema.RemoveCart, db: Session):
     }
 
 
-def checkout(user_id: str, db: Session):
+def checkout(user_id: str, request: cart_schema.UserAddress, db: Session):
     cart_items = db.query(cart_model.Cart).filter(cart_model.Cart.user_id == user_id).all()
 
     if len(cart_items) == 0:
@@ -117,7 +117,9 @@ def checkout(user_id: str, db: Session):
             "product_name": item.product_name,
             "product_price": item.product_price,
             "product_quantity": item.product_quantity,
-            "total_price": item.product_price * item.product_quantity
+            "total_price": item.product_price * item.product_quantity,
+            "user_address": request.user_address,
+            "user_phone": request.user_phone
         }
         for item in cart_items
     ]
@@ -143,7 +145,10 @@ def checkout(user_id: str, db: Session):
         order_event_data = json.dumps({
             "user_id": user_id,
             "order_id": new_order.id,
-            "cart_items": cart_items_data
+            "cart_items": cart_items_data,
+            "user_address": request.user_address,
+            "user_phone": request.user_phone,
+            "total_price": total_price
         })
         publish_order_event(order_event_data, "products_check")
     except Exception as e:
@@ -151,5 +156,24 @@ def checkout(user_id: str, db: Session):
 
     return {
         "user_id": user_id,
-        "cart_items": cart_items_data
+        "order_id": new_order.id,
+        "cart_items": cart_items_data,
+        "user_address": request.user_address,
+        "user_phone": request.user_phone,
+        "total_price": total_price
     }
+
+def update_order_status(order_id: int, request:  cart_schema.OrderStatus, db: Session):
+    order = db.query(order_model.Orders).filter(order_model.Orders.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    
+    if order.status == "Success":
+        order.is_success = True
+    else:
+        order.is_success = False
+    
+    order.status = request.status
+    order.reason = request.reason
+    db.commit()
+    db.refresh(order)
