@@ -13,10 +13,34 @@ spec:
     spec:
       containers:
       - name: cart
-        image: 
+        image: vikasbhapri.azurecr.io/ecommerce_cart_service:d84371429403be476a69f1a66955fa08a35bc33d
         resources:
           limits:
-            memory: "128Mi"
+            memory: "512Mi"
             cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
         ports:
-        - containerPort: <Port>
+        - containerPort: 8002
+        env:
+        - name: DATABASE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: ecommerce-cart-secret
+              key: DATABASE_CONNECTION_STRING
+        - name: SERVICEBUS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: ecommerce-cart-secret
+              key: SERVICEBUS_CONNECTION_STRING
+        - name: PRODUCTS_SVC_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ecommerce-cart-configmap
+              key: PRODUCTS_SVC_URL
+        - name: TOPIC_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: ecommerce-cart-configmap
+              key: TOPIC_NAME

@@ -8,5 +8,5 @@ class Cart(Base):
     product_name = Column(String)
     product_price = Column(Integer)
     product_quantity = Column(Integer)
-    user_id = Column(Integer)
+    user_id = Column(String)
 
