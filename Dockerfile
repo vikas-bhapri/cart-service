@@ -8,6 +8,6 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY . .
 
-EXPOSE 3103
+EXPOSE 8002
 
-CMD ["gunicorn", "--bind", "0.0.0.0:3103", "main:app", "--worker-class", "uvicorn.workers.UvicornWorker"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]

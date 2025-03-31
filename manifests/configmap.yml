@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-cart-configmap
+data:
+  PRODUCTS_SVC_URL: http://ecommerce-products-service:8001
+  TOPIC_NAME: order_message
