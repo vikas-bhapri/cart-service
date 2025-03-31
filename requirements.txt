@@ -6,3 +6,4 @@ python-multipart
 python-dotenv
 pydantic
 azure-servicebus
+psycopg2-binary
