@@ -37,5 +37,5 @@ jobs:
               env:
                 KUBECONFIG: ${{ github.workspace }}/kubeconfig
               run: |
-                kubectl set image deployment/ecommerce-cart-deployment cart=${{ secrets.ACR_LOGIN_SERVER }}/ecommerce_cart_service:${{ github.sha }}
+                kubectl set image deployment/ecommerce-cart-deployment cart=${{ secrets.ACR_NAME }}/ecommerce_cart_service:${{ github.sha }}
                 kubectl rollout status deployment/ecommerce-cart-deployment
