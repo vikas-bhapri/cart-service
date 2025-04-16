@@ -7,6 +7,7 @@ class InsertCart(BaseModel):
     product_name: Optional[str]
     product_quantity: int
     product_price: float
+    image_url: str
 
 class RemoveCart(BaseModel):
     user_id: str
@@ -17,6 +18,7 @@ class Product(BaseModel):
     product_name: str
     product_price: float
     product_quantity: int
+    image_url: Optional[str]
     total_price: float
 
 class DisplayCart(BaseModel):

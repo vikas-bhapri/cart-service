@@ -21,7 +21,21 @@ jobs:
                   username: ${{ secrets.ACR_USERNAME }}
                   password: ${{ secrets.ACR_PASSWORD }}
 
+            - name: Decode k8s config
+              run: |
+                echo "${{ secrets.KUBECONFIG_B64 }}" | base64 --decode > kubeconfig
+                export KUBECONFIG=$PWD/kubeconfig
+              env:
+                KUBECONFIG: ${{ github.workspace }}/kubeconfig
+
             - name: Build and push
               run: |
-                  docker build . -t ${{ secrets.ACR_NAME }}/ecommerce_cart_service:${{ github.sha }}
-                  docker push ${{ secrets.ACR_NAME }}/ecommerce_cart_service:${{ github.sha }}
+                docker build . -t ${{ secrets.ACR_NAME }}/ecommerce_cart_service:${{ github.sha }}
+                docker push ${{ secrets.ACR_NAME }}/ecommerce_cart_service:${{ github.sha }}
+
+            - name: Deploy to Kubernetes
+              env:
+                KUBECONFIG: ${{ github.workspace }}/kubeconfig
+              run: |
+                kubectl set image deployment/ecommerce-cart-deployment cart=${{ secrets.ACR_LOGIN_SERVER }}/ecommerce_cart_service:${{ github.sha }}
+                kubectl rollout status deployment/ecommerce-cart-deployment

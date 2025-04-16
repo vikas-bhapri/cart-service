@@ -9,4 +9,5 @@ class Cart(Base):
     product_price = Column(Integer)
     product_quantity = Column(Integer)
     user_id = Column(String)
+    image_url = Column(String)
 
