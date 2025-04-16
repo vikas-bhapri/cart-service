@@ -20,7 +20,7 @@ def publish_order_event(order_data, event_type):
             message = ServiceBusMessage(order_data)
             message.application_properties = {"event_type": event_type}
             sender.send_messages(message)
-            print(f"Published order event: {order_data}")
+            print(f"Published order event: {order_data} with event type: {event_type}")
 
 def add_to_cart(cart: cart_schema.InsertCart, db: Session):
     # Fetch the product details from the products service
@@ -46,6 +46,7 @@ def add_to_cart(cart: cart_schema.InsertCart, db: Session):
         product_name=cart.product_name,
         product_price=cart.product_price,
         product_quantity=cart.product_quantity,
+        image_url=cart.image_url,
         user_id=cart.user_id
     )
     db.add(new_cart)
@@ -61,6 +62,7 @@ def get_cart(user_id: str, db: Session):
             "product_name": item.product_name,
             "product_price": item.product_price,
             "product_quantity": item.product_quantity,
+            "image_url": item.image_url,
             "total_price": item.product_price * item.product_quantity
         }
         for item in result
@@ -92,6 +94,7 @@ def remove_from_cart(cart: cart_schema.RemoveCart, db: Session):
             "product_name": item.product_name,
             "product_price": item.product_price,
             "product_quantity": item.product_quantity,
+            "image_url": item.image_url,
             "total_price": item.product_price * item.product_quantity
         }
         for item in result
